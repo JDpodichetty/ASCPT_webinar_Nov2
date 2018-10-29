@@ -2,10 +2,12 @@
 #extracting selected feature data 
 
 #load libraries
-library(caret)
-library(DMwR)
-library(DMwR2)
-library(dplyr)
+library(caret)      # Classification And REgression Training
+library(cluster)    # Clustering analysis
+library(factoextra) # Extract and Visualize the Results of Multivariate Data Analyses
+library(ggplot2)    # Data visualization 
+library(DMwR2)      # Data mining with R 
+library(ggfortify)  # Data visualization 
 
 #remove environment data
 rm(list=ls())
