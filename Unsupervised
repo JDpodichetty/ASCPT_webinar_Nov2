@@ -1,0 +1,69 @@
+#UNSUPERVISED ML - STEP 1: Standardize/Scale Data 
+
+#extracting selected feature data
+
+library(caret)  #Classification And REgression Training
+library(DMwR2)  #Data mining with R 
+library(dplyr)  #Data manipulation
+
+ # remove environment data 
+rm(list=ls())
+
+# load data 
+df1 <- read.csv ("data_unsupervised.csv")
+
+#assign row names from subject ID  
+rownames(df1) <- df1[,1] 
+
+ #remove column with subject ID
+df1$src_subject_id <- NULL
+
+ #remove instances with NA or missing values 
+df1 <- na.omit(df1)
+
+#scale 
+df1 <- scale(df1) 
+
+#export as CSV to check the scaled data
+write.csv(df1, file = "data_check.csv", row.names=FALSE ) 
+
+##########################################################################################
+
+#UNSUPERVISED ML - STEP 2: Compute K-means Clusters
+
+#set seed
+set.seed(123)
+
+
+# Compute k-means clustering with k = 4
+
+km <- kmeans(df1, centers = 3, nstart = 25)
+str(km)
+
+
+##########################################################################################
+
+
+#UNSUPERVISED ML - STEP 3: Visualize using PCA
+
+# using PCA function 
+library(FactoMineR)
+PCA1 = PCA(df1, graph = FALSE)
+PCA1
+PCA1$var$coord
+
+#clusters in PC1 and PC2 
+autoplot(kmeans(df1, 3), data = df1, nstart =25, frame = TRUE, label = FALSE)
+
+#scree plot
+fviz_eig(PCA1,addlabels = TRUE, ylim = c(0,35), frame = TRUE, Font = 25, xlab = "PC")
+
+# Total cos2 of variables on Dim.1 and Dim.2
+fviz_cos2(PCA1, choice = "var", axes = 1:2, top=14)
+
+#circle of correlation
+fviz_pca_var(PCA1, col.var = "black")
+
+##########################################################################################
+
+
