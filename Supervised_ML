@@ -1,0 +1,77 @@
+#SUPERVISED ML - STEP 1: FEATURE SELECTION
+#extracting selected feature data 
+
+#load libraries
+library(caret)
+library(DMwR)
+library(DMwR2)
+library(dplyr)
+
+#remove environment data
+rm(list=ls())
+
+
+#load file 
+df = read.csv("all_data_baseline.csv") 
+
+#extract feature selected from pearson's corelation 
+extract <- df %>% select(1,256,	268,	285,	286,	257,	258,	287,	276,	269,	288,	97,	265,	272,	25,	71,	275,	267,	271,	280,	50,	252,	250,	260,	60,	66,	264,	34,	262,	181,	263,	123,	219,	246,	75,	279,	125,	192,	283,	204,	261,	23,	48,	266,	122,	80,	106,	274,	198,	144,	238,	62,	187,	27,	29,	78,	121,	281,	51,	221,	79,	282,	115,	111,	57,	118,	74,	49,	24,	214,	65,	259,	9,	175,	141,	228,	30,	220,	232,	200,	147,	108,	213,	1,	59,	102,	90,	35,	193,	137,	104,	284,	154,	43,	206,	112,	248,	139,	26,	72,	58,	88,	273,	218,	222,	191,	151,	270,	32,	197,	93,	91,	69,	190,	172,	101,	226,	186,	63,	166,	148,	138,	42,	4,	161,	247,	196,	2,	150,	174, 289)
+
+#remove NA and create CSV
+extract <- sapply(extract, as.character)
+extract[is.na(extract)] <- ""
+write.csv(extract, file = "data_net_extracted.csv", row.names=FALSE )
+
+
+####################################################################
+
+#SUPERVISED ML - STEP 2: SPLITTING DATA 
+
+# remove environment data 
+rm(list=ls()) 
+
+#load data 
+data_test <- read.csv ("data_net_extracted.csv")
+
+#data split 
+train <- data_test  %>% dplyr::sample_frac(.70)
+test  <- dplyr::anti_join(data_test, train, by = 'src_subject_id')
+
+#drop subject ID column
+train_v2 <- train[-c(1)]
+test_v2 <- test[-c(1)]
+
+#removing NA and exporting CSV file for train set
+training_Data_for_weka <- sapply(train_v2, as.character)
+training_Data_for_weka[is.na(training_Data_for_weka)] <- ""
+write.csv(training_Data_for_weka, file = "train_data.csv", row.names=FALSE )
+
+#removing NA and exporting CSV file for test set
+test_Data_for_weka <- sapply(test_v2, as.character)
+test_Data_for_weka[is.na(test_Data_for_weka)] <- ""
+write.csv(test_Data_for_weka, file = "test_data.csv", row.names=FALSE )
+
+####################################################################
+
+#SUPERVISED ML - STEP 3: BALANCING TRAINING SET 
+
+
+# remove environment data 
+rm(list=ls()) 
+
+#load training data
+data_train <- read.csv ("train_data.csv")
+
+#convert Outcome colum to factor 
+
+data_train$Outcome <- as.factor((data_train$Outcome))
+
+#use SMOTE function to balance 
+balance_data_train <- SMOTE(Outcome ~ ., data_train, perc.over = 250, k = 5, perc.under = 200) 
+
+#removing NA and exporting CSV file for balanced training set
+training_Data_for_weka <- sapply(balance_data_train, as.character)
+training_Data_for_weka[is.na(training_Data_for_weka)] <- ""
+write.csv(training_Data_for_weka, file = "balanced_train_set.csv", row.names=FALSE )
+
+####################################################################
